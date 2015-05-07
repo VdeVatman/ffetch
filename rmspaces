@@ -1,0 +1,12 @@
+#!/bin/bash
+export seguir=$(grep -E ' ' <(ls) | wc -l)
+echo hay $seguir o mas espacios, vamos a tratar de cambiarlos todos por _
+while true; do
+    rename ' ' _ *
+    seguir=$(grep -E ' ' <(ls) | wc -l)
+    echo quedan $seguir o mas  espacios
+    if [ $seguir -lt 1 ]; then
+	echo 'no hay mas espacios, salgo'
+	break;
+    fi
+done

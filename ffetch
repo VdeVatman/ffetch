@@ -1,0 +1,62 @@
+#!/bin/bash
+
+grep -P '(?<=[0-2][0-9]:[0-6][0-9]\s)\w+ [\w ]+' <(ls -l --color=n) > .ffetch_temp_file
+export n_affected_files=$(cat .ffetch_temp_file | wc -l)
+
+if [[ $n_affected_files ]]; then
+	echo ''
+	echo "!!!"
+	echo "WARNING: There is one or more spaces in any of your files or directories name"
+	echo "These are the affected files ($n_affected_files):"
+	cat -n .ffetch_temp_file
+	echo "!!!"
+	while true; do
+		export done=false
+		echo ''
+		printf '\nChoose the number of the file you want to fetch (if any)
+			\rtype S to continue
+			\rtype N to abort with no changes
+			\ranswer: '
+		read respuesta
+		if [ $respuesta = 'S' ]; then
+			printf "do you want to convert all spaces into _ ?(Y/N): "
+			read remplazar
+			if [ $remplazar = 'Y' ]; then
+				rmspaces
+			fi
+
+			break;
+		elif [ $respuesta = 'N' ]; then
+			echo 'Aborting without changes.'
+			break;
+		elif [ $respuesta -eq $respuesta 2>/dev/null ]; then
+			if [ $respuesta -gt $(cat .ffetch_temp_file | wc -l) ]; then
+				echo ''
+				echo 'The choosen number is greater than the number of files or directories.'
+				echo 'Try again.'
+			else
+				export output=$(grep ^"$respuesta" <(cat -n .ffetch_temp_file | sed 's/^\s*//g' ) | grep -oP '(?<=[0-2][0-9]:[0-6][0-9]\s)\w+ [\w ]+')
+				echo ''
+				printf "%q" "$output"
+				export done=true
+				break;
+			fi
+		else
+			echo INVALID INPUT: Try again.
+		fi
+	done
+fi
+
+if [ $done = 'false' ]; then
+	if [ $1 ]; then
+		export output=$(grep -ioE "[^ ]+$1[^ ]*$" <(ls -l --color=n))
+	else
+		export output=$(grep -oE '[^ ]*$' <(ultimo))
+	fi
+	echo ''
+	printf "%q" $output
+fi
+
+echo '' ; echo ''
+rm .ffetch_temp_file
+

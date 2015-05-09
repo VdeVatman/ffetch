@@ -2,8 +2,8 @@
 
 grep -P '(?<=[0-2][0-9]:[0-6][0-9]\s)\w+ [\w ]+' <(ls -l --color=n) > .ffetch_temp_file
 export n_affected_files=$(cat .ffetch_temp_file | wc -l)
-
-if [[ $n_affected_files ]]; then
+export done=false
+if [[ $n_affected_files != '0' ]]; then
 	echo ''
 	echo "!!!"
 	echo "WARNING: There is one or more spaces in any of your files or directories name"
@@ -49,7 +49,7 @@ fi
 
 if [ $done = 'false' ]; then
 	if [ $1 ]; then
-		export output=$(grep -ioE "[^ ]+$1[^ ]*$" <(ls -l --color=n))
+		export output=$(grep -ioE "[^ ]*$1[^ ]*$" <(ls -l --color=n))
 	else
 		export output=$(grep -oE '[^ ]*$' <(ultimo))
 	fi
